@@ -1,0 +1,13 @@
+
+    #privacyToggle{min-width:42px;font-size:18px}
+    .privacy-mode .value,.privacy-mode .positive,.privacy-mode .negative,.privacy-mode .txamount,.privacy-mode .fixeditem small,.privacy-mode .stats .sub,.privacy-mode #statsCharts .sub,.privacy-mode #dailyValue,.privacy-mode #dailyValue2,.privacy-mode .gp-summary .value,.privacy-mode .gp-item>strong,.privacy-mode .gp-budget-card .gp-note,.privacy-mode .gp-budget-card b,.privacy-mode .gp-month-heading>strong,.privacy-mode .cal-event b,.privacy-mode #stats .stat-value,.privacy-mode #stats .value,.privacy-mode #homeFixedDue,.privacy-mode #homeGoals{filter:blur(7px);user-select:none}
+    .cal-wrap{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:14px}
+    .cal-day{min-height:112px;padding:9px;border:1px solid var(--line);border-radius:13px;background:var(--panel);overflow:hidden}
+    .cal-day.muted{opacity:.42}.cal-day.today{border-color:var(--purple);box-shadow:inset 0 0 0 1px var(--purple)}
+    .cal-daynum{font-weight:700;font-size:12px;margin-bottom:7px}.cal-event{font-size:10px;line-height:1.35;padding:4px 5px;border-radius:6px;margin-top:4px;overflow-wrap:anywhere;background:color-mix(in srgb,var(--purple) 13%,transparent)}
+    .cal-event.expense{background:color-mix(in srgb,var(--red) 13%,transparent)}.cal-event.income{background:color-mix(in srgb,var(--green) 13%,transparent)}
+    .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:14px}.cal-week span{text-align:center;color:var(--muted);font-size:11px;font-weight:700}
+    .gp-budget-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.gp-budget-actions .btn{flex:1}
+    .gp-modal-backdrop{position:fixed;inset:0;background:#0009;z-index:1000;display:grid;place-items:center;padding:18px}.gp-modal-card{width:min(420px,100%);padding:22px;border-radius:18px;background:var(--panel);border:1px solid var(--line);box-shadow:0 18px 60px #0005}
+    @media(max-width:700px){.cal-wrap{gap:4px}.cal-day{min-height:82px;padding:5px}.cal-event{font-size:9px}.cal-week{gap:4px}}
+  

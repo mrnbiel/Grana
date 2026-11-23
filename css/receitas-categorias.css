@@ -1,0 +1,9 @@
+
+    #customCategoryList{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;margin-top:12px}
+    .grana-category-group{display:flex;flex-direction:column;gap:7px;min-width:0}
+    .grana-category-type{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .grana-category-badge{position:relative;display:inline-flex;align-items:center;max-width:220px;min-height:30px;padding:7px 27px 7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:11px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}
+    .grana-category-badge.custom{border-color:color-mix(in srgb,var(--purple) 45%,var(--line));background:color-mix(in srgb,var(--purple) 10%,var(--panel))}
+    .grana-category-badge button{position:absolute;right:-5px;top:-8px;width:19px;height:19px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--panel);color:var(--muted);font-size:14px;line-height:16px;cursor:pointer;display:grid;place-items:center}
+    .grana-category-badge button:hover{color:var(--red);border-color:var(--red)}
+  

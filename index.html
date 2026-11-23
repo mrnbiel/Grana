@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRANA — Gestão Financeira</title>
+  <!-- Ícone da aba do navegador -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 48 48%27%3E%3Crect width=%2748%27 height=%2748%27 rx=%2712%27 fill=%27%230b0813%27/%3E%3Ccircle cx=%2724%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%239a6bff%27 stroke-width=%273%27/%3E%3Cpath d=%27M8 30h8l14 2 12-6M8 40h14l20-12%27 fill=%27none%27 stroke=%27%239a6bff%27 stroke-width=%273%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/cartoes-orcamentos.css">
+  <link rel="stylesheet" href="css/calendario-privacidade-excel.css">
+  <link rel="stylesheet" href="css/receitas-categorias.css">
+</head>
+<body class="auth-required">
+  <section class="auth-gate" id="authGate" aria-labelledby="authTitle">
+    <div class="auth-shell">
+      <div class="auth-brand">
+        <div class="auth-brandmark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="12" r="8.5"/><path d="M24 7.5v1.6M24 14.9v1.6M26.6 10.4c-.4-1-1.4-1.5-2.6-1.5-1.5 0-2.6.8-2.6 1.9 0 2.5 5.4 1.3 5.4 3.9 0 1.1-1.1 1.9-2.8 1.9-1.3 0-2.4-.6-2.8-1.7"/><rect x="3" y="28" width="6" height="14" rx="2.2"/><path d="M9 30.5c4-2 8-2.5 13-1.5l8 1.2c3 .5 3 4 0 4.2l-9 .3M9 40c4-1 8-1.3 11.5-.8L40 30.5c2.4-1.2 4.2-3.4 2.4-4.6-1.1-.7-3-.2-5 .8l-6 3"/></svg></div>
+        <div><strong>GRANA</strong><small>FINANCE CONTROL</small></div>
+      </div>
+      <div class="auth-card">
+        <div class="eyebrow">ACESSO LOCAL</div>
+        <h1 id="authTitle">Bem-vindo</h1>
+        <p class="auth-desc" id="authDesc">Entre para acessar seu painel financeiro.</p>
+        <div class="auth-switch" role="tablist" aria-label="Acesso e cadastro"><button type="button" class="active" id="loginModeBtn" role="tab" aria-selected="true">Entrar</button><button type="button" id="registerModeBtn" role="tab" aria-selected="false">Criar conta</button></div>
+        <form id="loginForm" novalidate>
+          <div class="auth-field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="voce@exemplo.com" required></div>
+          <div class="auth-field"><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha" minlength="4" required></div>
+          <label class="auth-remember"><input id="loginRemember" type="checkbox" checked> <span>Manter acesso neste dispositivo</span></label>
+          <p class="auth-error" id="loginError" role="alert" hidden></p>
+          <button class="btn primary auth-submit" type="submit">Entrar no GRANA</button>
+        </form>
+        <form id="registerForm" novalidate hidden>
+          <div class="auth-field"><label for="registerName">Nome</label><input id="registerName" type="text" autocomplete="given-name" placeholder="Seu nome" minlength="2" maxlength="50" required></div>
+          <div class="auth-field"><label for="registerSurname">Sobrenome</label><input id="registerSurname" type="text" autocomplete="family-name" placeholder="Seu sobrenome" minlength="2" maxlength="70" required></div>
+          <div class="auth-field"><label for="registerBirth">Data de nascimento</label><input id="registerBirth" type="date" autocomplete="bday" required></div>
+          <div class="auth-field"><label for="registerCpf">CPF</label><input id="registerCpf" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required></div>
+          <div class="auth-field"><label for="registerEmail">E-mail</label><input id="registerEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></div>
+          <div class="auth-field"><label for="registerPassword">Senha</label><input id="registerPassword" type="password" autocomplete="new-password" placeholder="Mínimo de 4 caracteres" minlength="4" required></div>
+          <p class="auth-error" id="registerError" role="alert" hidden></p>
+          <button class="btn primary auth-submit" type="submit">Criar minha conta</button>
+        </form>
+        <p class="auth-footnote">O acesso é restrito a contas cadastradas e ao administrador. Seus dados ficam somente neste navegador; nada é enviado para um servidor.</p>
+      </div>
+    </div>
+  </section>
+  <div class="app">
+
+    <!-- =============================================================
+         MENU LATERAL
+         Cada botão tem data-page = id da <section> que ele abre
+         ============================================================= -->
+    <aside class="sidebar">
+
+      <!-- Logotipo: mão com moeda + nome -->
+      <div class="brand">
+        <div class="brandmark">
+          <svg viewBox="0 0 48 48" width="32" height="32" fill="none" stroke="url(#gi)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <defs>
+              <linearGradient id="gi" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#d9c8ff"/>
+                <stop offset="1" stop-color="#9a6bff"/>
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="12" r="8.5"/>
+            <path d="M24 7.5v1.6M24 14.9v1.6M26.6 10.4c-.4-1-1.4-1.5-2.6-1.5-1.5 0-2.6.8-2.6 1.9 0 2.5 5.4 1.3 5.4 3.9 0 1.1-1.1 1.9-2.8 1.9-1.3 0-2.4-.6-2.8-1.7"/>
+            <rect x="3" y="28" width="6" height="14" rx="2.2"/>
+            <path d="M9 30.5c4-2 8-2.5 13-1.5l8 1.2c3 .5 3 4 0 4.2l-9 .3M9 40c4-1 8-1.3 11.5-.8L40 30.5c2.4-1.2 4.2-3.4 2.4-4.6-1.1-.7-3-.2-5 .8l-6 3"/>
+          </svg>
+        </div>
+        <div>
+          <strong>GRANA</strong>
+          <small>FINANCE CONTROL</small>
+        </div>
+      </div>
+
+      <!-- Botões do menu -->
+      <nav class="nav">
+        <div class="navlabel">VISÃO GERAL</div>
+        <button class="active" data-page="inicio"><span class="ico">◈</span><span>Inicial</span></button>
+        <button data-page="lancamentos"><span class="ico">⇄</span><span>Lançamentos</span></button>
+        <button data-page="fixos"><span class="ico">↻</span><span>Movimentações fixas</span></button>
+
+        <div class="navlabel">PLANEJAMENTO</div>
+        <button data-page="graficos"><span class="ico">▥</span><span>Gráficos</span></button>
+        <button data-page="alertas"><span class="ico">⚠</span><span>Avisos</span></button>
+        <button data-page="metas"><span class="ico">◎</span><span>Metas</span></button>
+
+        <div class="navlabel">FERRAMENTAS</div>
+        <button data-page="juros"><span class="ico">%</span><span>Juros compostos</span></button>
+      </nav>
+    </aside>
+
+    <!-- =============================================================
+         CONTEÚDO PRINCIPAL
+         ============================================================= -->
+    <main class="main">
+
+      <!-- Topo: título da página, mês, backup e novo lançamento -->
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">PAINEL FINANCEIRO</div>
+          <h1 id="pageTitle">Visão geral</h1>
+        </div>
+        <div class="topactions">
+          <button class="btn" type="button" id="privacyToggle" aria-label="Ocultar valores" title="Ocultar valores"><span id="privacyIcon">◉</span></button>
+          <button class="btn primary" onclick="showPage('lancamentos')">＋ Novo lançamento</button>       
+          <input type="hidden" id="monthFilter" data-picker="month">
+          <button class="profile-btn" type="button" id="profileBtn" aria-label="Abrir perfil" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c.7-3.8 3.2-5.8 7.5-5.8s6.8 2 7.5 5.8"/></svg></button>
+          <div class="profile-menu" id="profileMenu" hidden>
+            <div class="profile-summary"><strong id="profileName">Usuário</strong><small id="profileEmail"></small></div>
+            <button type="button" id="profileEditBtn">Perfil</button>
+            <button type="button" id="profilePasswordBtn">Alterar senha</button>
+            <button type="button" id="profileLogoutBtn">Sair</button>
+            <form id="profileEditForm" hidden>
+              <label for="profileEditName">Nome</label><input id="profileEditName" required>
+              <label for="profileEditSurname">Sobrenome</label><input id="profileEditSurname" required>
+              <label for="profileEditBirth">Data de nascimento</label><input id="profileEditBirth" type="date" required>
+              <label for="profileEditCpf">CPF</label><input id="profileEditCpf" inputmode="numeric" maxlength="14" required>
+              <p class="profile-error" id="profileEditError" role="alert" hidden></p>
+              <div class="profile-form-actions"><button class="btn primary" type="submit">Salvar perfil</button><button class="btn" type="button" id="cancelProfileBtn">Voltar</button></div>
+            </form>
+            <form id="changePasswordForm" hidden>
+              <label for="currentPassword">Senha atual</label><input id="currentPassword" type="password" autocomplete="current-password" required>
+              <label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="4" required>
+              <p class="profile-error" id="changePasswordError" role="alert" hidden></p>
+              <div class="profile-form-actions"><button class="btn primary" type="submit">Salvar senha</button><button class="btn" type="button" id="cancelPasswordBtn">Cancelar</button></div>
+            </form>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===========================================================
+           PÁGINA: INICIAL — resumo do saldo, receitas e despesas
+           =========================================================== -->
+      <section class="page active" id="inicio">
+        <!-- Cards de resumo (preenchidos por renderStats) -->
+        <div class="grid stats" id="stats"></div>
+
+        <div class="grid lower">
+          <!-- Últimos lançamentos -->
+          <div class="card">
+            <div class="rowhead">
+              <div>
+                <h3 class="sectiontitle">Movimentações recentes</h3>
+                <div class="sectiondesc">Seus últimos lançamentos</div>
+              </div>
+              <button class="btn" onclick="showPage('lancamentos')">Ver todas</button>
+            </div>
+            <div id="recent"></div>
+          </div>
+
+          <!-- Orçamento diário -->
+          <div class="card daily">
+            <div class="eyebrow">ORÇAMENTO DIÁRIO</div>
+            <h3 class="sectiontitle">Quanto posso gastar por dia?</h3>
+            <div class="sectiondesc">Saldo livre após as contas fixas e as compras variáveis, dividido pelos dias restantes do mês (incluindo hoje).</div>
+            <div class="value" id="dailyValue">R$ 0,00</div>
+            <div class="sub" id="dailyInfo">Cadastre suas receitas e despesas para começar.</div>
+            <div class="progress"><span id="dailyProgress" style="width:0%"></span></div>
+            <div class="sub" id="dailySpent"></div>
+          </div>
+        </div>
+        <div class="grid two home-followups">
+          <div class="card"><div class="rowhead"><div><h3 class="sectiontitle">Contas fixas a pagar</h3><div class="sectiondesc">Próximos vencimentos do mês selecionado.</div></div><button class="btn" onclick="showPage('fixos')">Gerenciar</button></div><div id="homeFixedDue"></div></div>
+          <div class="card"><div class="rowhead"><div><h3 class="sectiontitle">Metas e aportes</h3><div class="sectiondesc">Registre o aporte planejado ou informe um valor variável. O aporte entra como despesa variável do mês.</div></div><button class="btn" onclick="showPage('metas')">Ver metas</button></div><div id="homeGoals"></div></div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PÁGINA: LANÇAMENTOS — entradas e saídas
+           =========================================================== -->
+      <section class="page" id="lancamentos">
+        <div class="grid two">
+
+          <!-- Formulário de novo lançamento -->
+          <div class="card">
+            <h3 class="sectiontitle">Adicionar lançamento</h3>
+            <div class="sectiondesc">Registre entradas e saídas. Para contas que se repetem todo mês, use a aba Despesas fixas.</div>
+            <form id="txForm">
+              <div class="formgrid">
+                <div class="field">
+                  <label>Tipo</label>
+                  <select id="txType">
+                    <option value="despesa">Despesa / saída</option>
+                    <option value="receita">Receita / entrada</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Valor (R$)</label>
+                  <input id="txAmount" type="number" min=".01" step=".01" placeholder="0,00" required>
+                </div>
+                <div class="field full">
+                  <label>Descrição</label>
+                  <input id="txDesc" placeholder="Ex.: supermercado, salário..." required>
+                </div>
+                <div class="field">
+                  <label>Categoria</label>
+                  <select id="txCat"></select>
+                </div>
+                <div class="field">
+                  <label>Data</label>
+                  <input id="txDate" type="hidden" data-picker="date">
+                </div>
+                <div class="field full">
+                  <label>Observação (opcional)</label>
+                  <input id="txNote" placeholder="Detalhes">
+                </div>
+              </div>
+              <div class="formactions">
+                <button class="btn primary" type="submit">Salvar lançamento</button>
+                <button class="btn" type="reset">Limpar</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Lista com filtros -->
+          <div class="card">
+            <h3 class="sectiontitle">Lançamentos do período</h3>
+            <div class="sectiondesc">Entradas e saídas registradas no mês selecionado.</div>
+
+            <!-- Filtros por tipo (receita/despesa) e por categoria -->
+            <div class="filters">
+              <div class="field">
+                <label>Filtrar por tipo</label>
+                <select id="filterType">
+                  <option value="todos">Todos</option>
+                  <option value="receita">Receitas</option>
+                  <option value="despesa">Despesas</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Filtrar por categoria</label>
+                <select id="filterCat"></select>
+              </div>
+              <button class="btn" type="button" id="filterClear">Limpar filtros</button>
+            </div>
+            <div class="txsummary" id="txSummary"></div>
+
+            <div style="overflow:auto">
+              <table class="table">
+                <thead>
+                  <tr><th>DESCRIÇÃO</th><th>DATA</th><th>VALOR</th><th></th></tr>
+                </thead>
+                <tbody id="txTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PÁGINA: MOVIMENTAÇÕES FIXAS — receitas e despesas recorrentes
+           =========================================================== -->
+      <section class="page" id="fixos">
+        <div class="grid two">
+          <div class="card">
+            <h3 class="sectiontitle">Cadastrar despesa fixa</h3>
+            <div class="sectiondesc">Cadastre despesas recorrentes e acompanhe o pagamento mensal.</div>
+            <form id="fixedForm">
+              <div class="formgrid">
+                <div class="field full">
+                  <label>Nome da despesa</label>
+                  <input id="fixedName" placeholder="Ex.: aluguel, internet..." required>
+                </div>
+                <div class="field">
+                  <label>Valor mensal (R$)</label>
+                  <input id="fixedAmount" type="number" min=".01" step=".01" required>
+                </div>
+                <div class="field">
+                  <label>Categoria</label>
+                  <select id="fixedCat"></select>
+                </div>
+                <div class="field">
+                  <label>Dia do vencimento</label>
+                  <input id="fixedDue" type="number" min="1" max="31" value="10" required>
+                </div>
+              </div>
+              <div class="formactions">
+                <button class="btn primary">Adicionar despesa fixa</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 class="sectiontitle">Contas recorrentes</h3>
+            <div class="sectiondesc">Marque a caixa quando concluir o pagamento. A confirmação vale para o mês selecionado.</div>
+            <div id="fixedList"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 class="sectiontitle">Adicionar receita fixa</h3>
+          <div class="sectiondesc">Cadastre salário, benefícios ou outras entradas recorrentes e confirme o recebimento em cada mês.</div>
+          <form id="incomeFixedForm">
+            <div class="formgrid">
+              <div class="field full"><label>Nome da receita</label><input id="incomeFixedName" placeholder="Ex.: salário, benefício..." required></div>
+              <div class="field"><label>Valor mensal (R$)</label><input id="incomeFixedAmount" type="number" min=".01" step=".01" required></div>
+              <div class="field"><label>Categoria</label><select id="incomeFixedCat"></select></div>
+              <div class="field"><label>Dia previsto</label><input id="incomeFixedDue" type="number" min="1" max="31" value="5" required></div>
+            </div>
+            <div class="formactions"><button class="btn primary" type="submit">Adicionar receita fixa</button></div>
+          </form>
+          <div class="sectiondesc" style="margin-top:18px">Receitas recorrentes do mês selecionado</div>
+          <div id="incomeFixedList"></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 class="sectiontitle">Categorias personalizadas</h3>
+          <div class="sectiondesc">Crie categorias para organizar suas receitas e despesas. Elas serão exibidas em ordem alfabética nos campos de seleção.</div>
+          <form id="customCategoryForm">
+            <div class="formgrid">
+              <div class="field">
+                <label>Nome da categoria</label>
+                <input id="customCategoryName" placeholder="Ex.: Pets, Academia..." required>
+              </div>
+              <div class="field">
+                <label>Tipo</label>
+                <select id="customCategoryType">
+                  <option value="despesa">Despesa</option>
+                  <option value="receita">Receita</option>
+                </select>
+              </div>
+            </div>
+            <div class="formactions"><button class="btn primary" type="submit">Criar categoria</button></div>
+          </form>
+          <div class="sectiondesc" style="margin-top:18px">Suas categorias personalizadas</div>
+          <div id="customCategoryList"></div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PÁGINA: GRÁFICOS — pizza (%) e barras (valores)
+           =========================================================== -->
+      <section class="page" id="graficos">
+        <!-- Cards de receitas, despesas, saldo e despesas fixas -->
+        <div class="grid stats" id="statsCharts"></div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3 class="sectiontitle">Despesas por categoria</h3>
+            <div class="sectiondesc">Percentual de cada categoria no mês selecionado</div>
+            <div class="chartwrap"><canvas id="pieFull"></canvas></div>
+            <div class="legend" id="pieLegendFull"></div>
+          </div>
+          <div class="card">
+            <h3 class="sectiontitle">Receitas x despesas</h3>
+            <div class="sectiondesc">Valores em reais por mês</div>
+            <div class="chartwrap"><canvas id="barFull"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PÁGINA: AVISOS — prazos, gastos altos e limite diário
+           (o id continua "alertas" para o menu e o código)
+           =========================================================== -->
+      <section class="page" id="alertas">
+        <div class="grid two">
+          <div class="card">
+            <h3 class="sectiontitle">Central de avisos</h3>
+            <div class="sectiondesc">Vencimentos próximos e despesas que merecem atenção.</div>
+            <div id="alertsList"></div>
+          </div>
+
+          <div class="card daily">
+            <div class="eyebrow">SEU LIMITE DIÁRIO</div>
+            <h3 class="sectiontitle">Quanto posso gastar por dia</h3>
+            <div class="value" id="dailyValue2">R$ 0,00</div>
+            <div class="sub" id="dailyInfo2"></div>
+            <div class="progress"><span id="dailyProgress2"></span></div>
+            <div class="sub" id="dailySpent2"></div>
+            <p class="notice">O cálculo considera as receitas, as despesas fixas (pagas e pendentes) e as despesas variáveis já lançadas. Cada compra variável reduz o valor diário. É uma estimativa de planejamento, não uma movimentação bancária.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PÁGINA: METAS — quanto guardar por mês
+           =========================================================== -->
+      <section class="page" id="metas">
+        <div class="grid two">
+          <div class="card">
+            <h3 class="sectiontitle">Criar uma meta</h3>
+            <div class="sectiondesc">Defina um objetivo e veja quanto precisa reservar por mês.</div>
+            <form id="goalForm">
+              <div class="formgrid">
+                <div class="field full">
+                  <label>Nome da meta</label>
+                  <input id="goalName" placeholder="Ex.: viagem, reserva..." required>
+                </div>
+                <div class="field">
+                  <label>Valor desejado (R$)</label>
+                  <input id="goalTarget" type="number" min=".01" step=".01" required>
+                </div>
+                <div class="field">
+                  <label>Já tenho (R$)</label>
+                  <input id="goalSaved" type="number" min="0" step=".01" value="0">
+                </div>
+                <div class="field">
+                  <label>Prazo em</label>
+                  <select id="goalUnit">
+                    <option value="meses">Meses</option>
+                    <option value="dias">Dias</option>
+                    <option value="anos">Anos</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Quantidade</label>
+                  <input id="goalTime" type="number" min="1" value="6" required>
+                </div>
+              </div>
+              <div class="formactions">
+                <button class="btn primary">Criar meta</button>
+              </div>
+            </form>
+            <div class="calcresult">
+              <span class="muted">Aporte mensal necessário</span>
+              <strong id="goalPreview">R$ 0,00</strong>
+              <small class="muted">Atualiza conforme você preenche os campos.</small>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="sectiontitle">Suas metas</h3>
+            <div class="sectiondesc">Acompanhe seu progresso e edite o valor da meta quando precisar.</div>
+            <div id="goalsList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===========================================================
+           PÁGINA: JUROS COMPOSTOS — duas calculadoras
+           =========================================================== -->
+      <section class="page" id="juros">
+
+        <!-- Calculadora 1: quanto vai render -->
+        <div class="grid two">
+          <div class="card">
+            <h3 class="sectiontitle">Simulador de juros compostos</h3>
+            <div class="sectiondesc">Projete o crescimento do seu investimento com aportes recorrentes.</div>
+            <form id="interestForm">
+              <div class="formgrid">
+                <div class="field full">
+                  <label>Investimento inicial (R$)</label>
+                  <input id="principal" type="number" min="0" step=".01" value="1000">
+                </div>
+                <div class="field">
+                  <label>Aporte mensal (R$)</label>
+                  <input id="contribution" type="number" min="0" step=".01" value="200">
+                </div>
+                <div class="field">
+                  <label>Taxa de juros (%)</label>
+                  <input id="rate" type="number" min="0" step=".01" value="0.8">
+                </div>
+                <div class="field">
+                  <label>Taxa é</label>
+                  <select id="rateUnit">
+                    <option value="mes">Ao mês</option>
+                    <option value="ano">Ao ano</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Período</label>
+                  <input id="period" type="number" min="1" value="24">
+                </div>
+                <div class="field">
+                  <label>Unidade</label>
+                  <select id="periodUnit">
+                    <option value="meses">Meses</option>
+                    <option value="anos">Anos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="formactions">
+                <button class="btn primary" type="submit">Calcular rendimento</button>
+              </div>
+            </form>
+            <div class="calcresult">
+              <span class="muted">Montante estimado</span>
+              <strong class="positive" id="interestTotal">R$ 0,00</strong>
+              <div class="sub" id="interestDetails"></div>
+            </div>
+            <p class="notice">Simulação matemática com taxa constante e aportes no fim de cada mês. Não considera impostos, taxas, inflação ou oscilações do mercado. Rentabilidade passada ou simulada não garante resultados futuros.</p>
+          </div>
+
+          <div class="card">
+            <h3 class="sectiontitle">Composição do investimento</h3>
+            <div class="sectiondesc">Quanto veio do seu bolso e quanto veio dos juros.</div>
+            <div class="chartwrap"><canvas id="interestPie"></canvas></div>
+            <div class="legend" id="interestLegend"></div>
+          </div>
+        </div>
+
+        <!-- Calculadora 2: quanto guardar para chegar a um valor -->
+        <div class="grid two subtitle-sep">
+          <div class="card">
+            <h3 class="sectiontitle">Quanto guardar para chegar a um valor</h3>
+            <div class="sectiondesc">Ex.: para juntar R$ 1.000.000 em 20 anos com uma taxa de 0,8% ao mês, quanto guardar por mês?</div>
+            <form id="savingForm">
+              <div class="formgrid">
+                <div class="field">
+                  <label>Valor que quero juntar (R$)</label>
+                  <input id="sgTarget" type="number" min="0" step=".01" value="1000000">
+                </div>
+                <div class="field">
+                  <label>Já tenho investido (R$)</label>
+                  <input id="sgStart" type="number" min="0" step=".01" value="0">
+                </div>
+                <div class="field">
+                  <label>Taxa de juros (%)</label>
+                  <input id="sgRate" type="number" min="0" step=".01" value="0.8">
+                </div>
+                <div class="field">
+                  <label>Taxa é</label>
+                  <select id="sgRateUnit">
+                    <option value="mes">Ao mês</option>
+                    <option value="ano">Ao ano</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Prazo</label>
+                  <input id="sgPeriod" type="number" min="1" value="20">
+                </div>
+                <div class="field">
+                  <label>Unidade</label>
+                  <select id="sgPeriodUnit">
+                    <option value="anos">Anos</option>
+                    <option value="meses">Meses</option>
+                  </select>
+                </div>
+              </div>
+              <div class="formactions">
+                <button class="btn primary" type="submit">Calcular quanto guardar</button>
+              </div>
+            </form>
+            <div class="calcresult">
+              <span class="muted">Guardar por mês</span>
+              <strong class="positive" id="sgResult">R$ 0,00</strong>
+              <div class="sub" id="sgDetails"></div>
+            </div>
+            <p class="notice">Aportes no fim de cada mês, taxa constante, sem impostos, taxas ou inflação. Estimativa para planejamento.</p>
+          </div>
+
+          <div class="card">
+            <h3 class="sectiontitle">Composição até o objetivo</h3>
+            <div class="sectiondesc">Quanto sai do seu bolso e quanto é ganho com os juros.</div>
+            <div class="chartwrap"><canvas id="sgPie"></canvas></div>
+            <div class="legend" id="sgLegend"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===============================================================
+           EXPORTAR / IMPORTAR (canto inferior direito)
+           =============================================================== -->
+      <div class="dock" role="group" aria-label="Backup dos dados">
+        <button class="btn" onclick="exportData()" title="Exportar dados em JSON ou PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Exportar
+        </button>
+        <button class="btn" onclick="$('importFile').click()" title="Restaurar backup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>
+          Importar
+        </button>
+        <input type="file" id="importFile" accept=".json" hidden>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===============================================================
+       CARD DE EDIÇÃO: LANÇAMENTO
+       =============================================================== -->
+  <div class="modal-overlay" id="txModal" hidden>
+    <div class="card modal" role="dialog" aria-modal="true" aria-labelledby="txModalTitle">
+      <h3 id="txModalTitle">Editar lançamento</h3>
+      <div class="sectiondesc">Altere os dados e salve. Os totais, gráficos e avisos são recalculados automaticamente.</div>
+      <form id="editTxForm">
+        <div class="formgrid">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="editType">
+              <option value="despesa">Despesa / saída</option>
+              <option value="receita">Receita / entrada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor (R$)</label>
+            <input id="editAmount" type="number" min=".01" step=".01" required>
+          </div>
+          <div class="field full">
+            <label>Descrição</label>
+            <input id="editDesc" required>
+          </div>
+          <div class="field">
+            <label>Categoria</label>
+            <select id="editCat"></select>
+          </div>
+          <div class="field">
+            <label>Data</label>
+            <input id="editDate" type="hidden" data-picker="date">
+          </div>
+          <div class="field full">
+            <label>Observação (opcional)</label>
+            <input id="editNote">
+          </div>
+        </div>
+        <div class="formactions">
+          <button class="btn primary" type="submit">Salvar alterações</button>
+          <button class="btn" type="button" data-close="txModal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===============================================================
+       CARD DE EDIÇÃO: META
+       =============================================================== -->
+  <div class="modal-overlay" id="goalModal" hidden>
+    <div class="card modal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+      <h3 id="goalModalTitle">Editar meta</h3>
+      <div class="sectiondesc">Ajuste o valor da meta, quanto já guardou e o prazo final.</div>
+      <form id="editGoalForm">
+        <div class="formgrid">
+          <div class="field full">
+            <label>Nome da meta</label>
+            <input id="editGoalName" required>
+          </div>
+          <div class="field">
+            <label>Valor da meta (R$)</label>
+            <input id="editGoalTarget" type="number" min=".01" step=".01" required>
+          </div>
+          <div class="field">
+            <label>Já guardado (R$)</label>
+            <input id="editGoalSaved" type="number" min="0" step=".01" required>
+          </div>
+          <div class="field full">
+            <label>Prazo final</label>
+            <input id="editGoalDeadline" type="hidden" data-picker="date">
+          </div>
+        </div>
+        <div class="calcresult">
+          <span class="muted">Aporte mensal necessário</span>
+          <strong class="positive" id="editGoalPreview">R$ 0,00</strong>
+        </div>
+        <div class="formactions">
+          <button class="btn primary" type="submit">Salvar meta</button>
+          <button class="btn" type="button" data-close="goalModal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal-overlay" id="goalContributionModal" hidden><div class="card modal" role="dialog" aria-modal="true"><h3>Adicionar aporte mensal variável</h3><div class="sectiondesc" id="goalContributionHint"></div><form id="goalContributionForm"><input type="hidden" id="contributionGoalId"><div class="formgrid"><div class="field"><label for="contributionMonth">Mês do aporte</label><input id="contributionMonth" type="month" required></div><div class="field"><label for="contributionAmount">Valor debitado no mês (R$)</label><input id="contributionAmount" type="number" min="0" step=".01" required></div></div><div class="formactions"><button class="btn primary" type="submit">Salvar aporte variável</button><button class="btn" type="button" data-close="goalContributionModal">Cancelar</button></div></form></div></div>
+  <div class="modal-overlay" id="fixedEditModal" hidden><div class="card modal" role="dialog" aria-modal="true"><h3>Editar valor da conta fixa</h3><div class="sectiondesc" id="fixedEditHint"></div><form id="fixedEditForm"><input type="hidden" id="fixedEditId"><div class="field"><label for="fixedEditAmount">Novo valor mensal (R$)</label><input id="fixedEditAmount" type="number" min=".01" step=".01" required></div><div class="formactions"><button class="btn primary" type="submit">Salvar valor</button><button class="btn" type="button" data-close="fixedEditModal">Cancelar</button></div></form></div></div>
+
+  <!-- ===============================================================
+       CARD: EXPORTAR (JSON ou PDF)
+       =============================================================== -->
+  <div class="modal-overlay" id="exportModal" hidden>
+    <div class="card modal exp-card" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <h3 id="exportTitle">Exportar dados</h3>
+      <div class="sectiondesc">Escolha o formato do arquivo.</div>
+      <div class="exp-options">
+        <button type="button" class="exp-opt" id="expJson">
+          <span class="exp-badge">JSON</span>
+          <span><strong>Backup completo</strong><small>Todos os lançamentos, despesas fixas e metas. Pode ser restaurado depois com o botão Importar.</small></span>
+        </button>
+        <button type="button" class="exp-opt" id="expPdf">
+          <span class="exp-badge pdf">PDF</span>
+          <span><strong>Relatório do mês</strong><small id="expPdfInfo"></small></span>
+        </button>
+        <button type="button" class="exp-opt" id="expExcel">
+          <span class="exp-badge excel">XLS</span>
+          <span><strong>Planilha para Excel</strong><small>Baixar lançamentos e resumo financeiro do mês em uma planilha compatível com Excel.</small></span>
+        </button>
+      </div>
+      <div class="formactions">
+        <button class="btn" type="button" data-close="exportModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===============================================================
+       CARD: CONFIRMAÇÃO (exclusões e substituição de dados)
+       =============================================================== -->
+  <div class="modal-overlay top" id="confirmModal" hidden>
+    <div class="card modal confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMsg">
+      <div class="confirm-ico" id="confirmIco">!</div>
+      <h3 id="confirmTitle"></h3>
+      <p class="confirm-msg" id="confirmMsg"></p>
+      <div class="confirm-detail" id="confirmDetail" hidden></div>
+      <div class="formactions confirm-actions">
+        <button class="btn" type="button" id="confirmCancel">Cancelar</button>
+        <button class="btn danger" type="button" id="confirmOk">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===============================================================
+       CARD: SELETOR DE DATA (calendário; mês e ano abrem listas)
+       =============================================================== -->
+  <div class="modal-overlay top" id="dateModal" hidden>
+    <div class="card modal dp-card" role="dialog" aria-modal="true" aria-label="Selecionar data">
+      <div class="dp-head" id="dpHead"></div>
+      <div id="dpBody"></div>
+      <div class="dp-foot">
+        <button class="btn" type="button" id="dpToday">Hoje</button>
+        <button class="btn" type="button" data-close="dateModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===============================================================
+       LÓGICA DO SISTEMA (cálculos, telas e gráficos)
+       =============================================================== -->
+  <script src="js/app.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
