@@ -1800,7 +1800,10 @@ async function initAuth(onReady) {
     profile = data;
     completion = !data.nome || !data.sobrenome || !data.nascimento || !data.cpf;
     if (completion) {
-      mode(false); $('loginForm').hidden = true; $('registerForm').hidden = false;
+      requestForm.hidden = true; recoveryForm.hidden = true;
+      document.querySelector('.auth-switch').hidden = true;
+      $('loginForm').hidden = true; $('registerForm').hidden = false;
+      $('registerForm').querySelector('[type=submit]').textContent = 'Salvar perfil';
       $('authTitle').textContent = 'Complete seu perfil';
       $('authDesc').textContent = 'Salve seus dados para continuar.';
       fill('register');

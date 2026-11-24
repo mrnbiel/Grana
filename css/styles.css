@@ -379,3 +379,8 @@ body.auth-required .app { visibility: hidden; }
   background: #63616b;
 }
 
+/* Mantém formulários altos acessíveis sem cortar o início. */
+body.auth-required { overflow: hidden; }
+.auth-gate { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.auth-shell { flex: 0 0 auto; margin-block: auto; }
+.auth-gate { scrollbar-width: thin; scrollbar-color: #45434b #0b0813; }
