@@ -1,3 +1,4 @@
+import { userStorage } from '../core/armazenamento.js';
 import { appState, categories, orderedCategories, save, selectedMonth } from '../core/estado.js';
 import { fillCats, fillFilterCats } from '../core/acoes.js';
 import { askConfirm } from '../core/dialogos.js';
@@ -18,7 +19,7 @@ function initReceitasCategorias() {
   };
   let incomeFixed = [];
   try {
-    incomeFixed = JSON.parse(localStorage.getItem('grana_receitas_fixas_v1') || '[]');
+    incomeFixed = JSON.parse(userStorage.getItem('grana_receitas_fixas_v1') || '[]');
     if (!Array.isArray(incomeFixed)) incomeFixed = [];
   } catch (_) {
     incomeFixed = [];
@@ -28,14 +29,14 @@ function initReceitasCategorias() {
     receita: []
   };
   try {
-    custom = Object.assign(custom, JSON.parse(localStorage.getItem('grana_categorias_personalizadas_v1') || '{}'));
+    custom = Object.assign(custom, JSON.parse(userStorage.getItem('grana_categorias_personalizadas_v1') || '{}'));
   } catch (_) {}
   let removedDefaults = {
     despesa: [],
     receita: []
   };
   try {
-    removedDefaults = Object.assign(removedDefaults, JSON.parse(localStorage.getItem('grana_categorias_padroes_excluidas_v1') || '{}'));
+    removedDefaults = Object.assign(removedDefaults, JSON.parse(userStorage.getItem('grana_categorias_padroes_excluidas_v1') || '{}'));
   } catch (_) {}
   ['despesa', 'receita'].forEach(type => {
     const removed = Array.isArray(removedDefaults[type]) ? removedDefaults[type] : [];
@@ -45,7 +46,7 @@ function initReceitasCategorias() {
     });
   });
   function saveIncome() {
-    localStorage.setItem('grana_receitas_fixas_v1', JSON.stringify(incomeFixed));
+    userStorage.setItem('grana_receitas_fixas_v1', JSON.stringify(incomeFixed));
   }
   function refreshCategorySelects() {
     if (typeof fillCats === 'function') fillCats();
@@ -166,7 +167,7 @@ function initReceitasCategorias() {
     categories[type].push(name);
     custom[type] = custom[type] || [];
     custom[type].push(name);
-    localStorage.setItem('grana_categorias_personalizadas_v1', JSON.stringify(custom));
+    userStorage.setItem('grana_categorias_personalizadas_v1', JSON.stringify(custom));
     refreshCategorySelects();
     renderCustomCategoryList();
     e.target.reset();
@@ -187,11 +188,11 @@ function initReceitasCategorias() {
     const isCustom = (custom[type] || []).includes(name);
     if (isCustom) {
       custom[type] = custom[type].filter(c => c !== name);
-      localStorage.setItem('grana_categorias_personalizadas_v1', JSON.stringify(custom));
+      userStorage.setItem('grana_categorias_personalizadas_v1', JSON.stringify(custom));
     } else {
       removedDefaults[type] = removedDefaults[type] || [];
       if (!removedDefaults[type].includes(name)) removedDefaults[type].push(name);
-      localStorage.setItem('grana_categorias_padroes_excluidas_v1', JSON.stringify(removedDefaults));
+      userStorage.setItem('grana_categorias_padroes_excluidas_v1', JSON.stringify(removedDefaults));
     }
     categories[type] = categories[type].filter(c => c !== name);
     refreshCategorySelects();

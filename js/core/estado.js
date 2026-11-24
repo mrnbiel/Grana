@@ -1,3 +1,4 @@
+import { userStorage } from './armazenamento.js';
 import { cents, ymd } from './calculos.js';
 import { askConfirm } from './dialogos.js';
 import { render } from './renderizacao.js';
@@ -39,7 +40,7 @@ const appState = { data: { transactions: [], fixed: [], goals: [] }, current: 'i
 
 function save() {
   try {
-    localStorage.setItem('vertice_data', JSON.stringify(appState.data));
+    userStorage.setItem('vertice_data', JSON.stringify(appState.data));
   } catch (e) {
     askConfirm({
       title: 'Não foi possível salvar',
@@ -58,7 +59,7 @@ const monthTx = () => appState.data.transactions.filter(t => t.date.slice(0, 7) 
 function initEstado() {
 window.granaExpenseCategories = () => orderedCategories(categories.despesa);
 try {
-  const saved = JSON.parse(localStorage.getItem('vertice_data') || 'null');
+  const saved = JSON.parse(userStorage.getItem('vertice_data') || 'null');
   if (saved && Array.isArray(saved.transactions)) {
     appState.data = {
       transactions: saved.transactions,

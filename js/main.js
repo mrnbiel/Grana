@@ -14,6 +14,7 @@ import { initCartoesOrcamentos } from './features/cartoes-orcamentos.js';
 import { initCalendarioPrivacidadeExcel } from './features/calendario-privacidade-excel.js';
 import { initReceitasCategorias } from './features/receitas-categorias.js';
 
+initAuth(() => {
 installCompatibility();
 initCalculos();
 initEstado();
@@ -25,7 +26,9 @@ initGraficos();
 initRenderizacao();
 initCalculadoras();
 initInicializacao();
-initAuth();
+
 initCartoesOrcamentos();
 initCalendarioPrivacidadeExcel();
 initReceitasCategorias();
+
+});

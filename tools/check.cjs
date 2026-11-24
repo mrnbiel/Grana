@@ -1,0 +1,31 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '..');
+const auth = fs.readFileSync(path.join(root,'js/core/auth.js'),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/^export .*;\r?$/gm,'');
+const fields = {registerName:'Maria',registerSurname:'Silva',registerBirth:'2000-01-01',registerCpf:'529.982.247-25'};
+const context = vm.createContext({document:{getElementById:id=>({value:fields[id]})}});
+vm.runInContext(auth,context);
+assert(context.validCpf('52998224725'));
+assert(!context.validCpf('33333333333'));
+assert(!context.validCpf('52998224724'));
+assert.equal(context.profileValues('register').cpf,'52998224725');
+fields.registerBirth='2000-02-30'; assert.throws(()=>context.profileValues('register'));
+fields.registerBirth='2099-01-01'; assert.throws(()=>context.profileValues('register'));
+const data = new Map();
+const storageContext = vm.createContext({window:{},localStorage:{getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)}});
+vm.runInContext(fs.readFileSync(path.join(root,'js/core/armazenamento.js'),'utf8').replace(/^export .*;\r?$/gm,'')+'\nthis.storage=userStorage;',storageContext);
+assert.throws(()=>storageContext.storage.getItem('vertice_data'));
+storageContext.window.granaUserId='A'; storageContext.storage.setItem('vertice_data','A');
+storageContext.window.granaUserId='B'; assert.equal(storageContext.storage.getItem('vertice_data'),null);
+storageContext.storage.setItem('vertice_data','B');
+storageContext.window.granaUserId='A'; assert.equal(storageContext.storage.getItem('vertice_data'),'A');
+for (const name of ['index.html','index.modules.html']) {
+ const html=fs.readFileSync(path.join(root,name),'utf8');
+ assert.equal((html.match(/supabase-config.js/g)||[]).length,1);
+ assert.equal((html.match(/supabase-js@2/g)||[]).length,1);
+ assert(!(html.includes('src="js/main.js"')&&html.includes('src="js/app.js"')));
+}
+new vm.Script(fs.readFileSync(path.join(root,'js/app.js'),'utf8'));
+console.log('PASSOU: CPF, datas, isolamento local por conta, bloqueio sem sessão, entradas HTML e sintaxe do bundle.');

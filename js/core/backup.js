@@ -1,3 +1,4 @@
+import { userStorage } from './armazenamento.js';
 import { appState } from './estado.js';
 import { ymd } from './calculos.js';
 
@@ -5,15 +6,15 @@ const backupKeys = ['grana_prioridades_v1', 'grana_receitas_fixas_v1',
   'grana_categorias_personalizadas_v1', 'grana_categorias_padroes_excluidas_v1', 'grana_privacy_mode'];
 
 function writeRecords(records) {
-  const before = Object.fromEntries(Object.keys(records).map(k => [k, localStorage.getItem(k)]));
+  const before = Object.fromEntries(Object.keys(records).map(k => [k, userStorage.getItem(k)]));
   try {
     for (const [key, value] of Object.entries(records)) {
-      if (value === null) localStorage.removeItem(key);
-      else localStorage.setItem(key, value);
+      if (value === null) userStorage.removeItem(key);
+      else userStorage.setItem(key, value);
     }
   } catch (error) {
     for (const [key, value] of Object.entries(before)) {
-      if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value);
+      if (value === null) userStorage.removeItem(key); else userStorage.setItem(key, value);
     }
     throw error;
   }
@@ -21,7 +22,7 @@ function writeRecords(records) {
 
 function createBackup() {
   return { ...appState.data, format: 'grana', version: 2,
-    extensions: Object.fromEntries(backupKeys.map(k => [k, localStorage.getItem(k)])) };
+    extensions: Object.fromEntries(backupKeys.map(k => [k, userStorage.getItem(k)])) };
 }
 
 function validateBackup(input) {

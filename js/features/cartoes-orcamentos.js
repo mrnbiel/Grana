@@ -1,3 +1,4 @@
+import { userStorage } from '../core/armazenamento.js';
 import { appState } from '../core/estado.js';
 import { uid } from '../core/calculos.js';
 import { writeRecords } from '../core/backup.js';
@@ -55,7 +56,7 @@ function initCartoesOrcamentos() {
     paidInvoices: []
   };
   try {
-    const old = JSON.parse(localStorage.getItem(KEY) || 'null');
+    const old = JSON.parse(userStorage.getItem(KEY) || 'null');
     if (old && typeof old === 'object') state = {
       cards: Array.isArray(old.cards) ? old.cards : [],
       purchases: Array.isArray(old.purchases) ? old.purchases : [],

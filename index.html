@@ -11,8 +11,14 @@
   <link rel="stylesheet" href="css/cartoes-orcamentos.css">
   <link rel="stylesheet" href="css/calendario-privacidade-excel.css">
   <link rel="stylesheet" href="css/receitas-categorias.css">
+  <style>
+    #authLoading { display: none; }
+    body.auth-loading #authGate, body.auth-loading .app { display: none !important; }
+    body.auth-loading #authLoading { display: grid; min-height: 100vh; place-items: center; color: #d9c8ff; background: #0b0813; font-family: inherit; }
+  </style>
 </head>
-<body class="auth-required">
+<body class="auth-required auth-loading">
+  <div id="authLoading" role="status" aria-live="polite">Carregando sua conta…</div>
   <section class="auth-gate" id="authGate" aria-labelledby="authTitle">
     <div class="auth-shell">
       <div class="auth-brand">
@@ -20,14 +26,13 @@
         <div><strong>GRANA</strong><small>FINANCE CONTROL</small></div>
       </div>
       <div class="auth-card">
-        <div class="eyebrow">ACESSO LOCAL</div>
+        <div class="eyebrow">SUA CONTA</div>
         <h1 id="authTitle">Bem-vindo</h1>
         <p class="auth-desc" id="authDesc">Entre para acessar seu painel financeiro.</p>
         <div class="auth-switch" role="tablist" aria-label="Acesso e cadastro"><button type="button" class="active" id="loginModeBtn" role="tab" aria-selected="true">Entrar</button><button type="button" id="registerModeBtn" role="tab" aria-selected="false">Criar conta</button></div>
         <form id="loginForm" novalidate>
           <div class="auth-field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="voce@exemplo.com" required></div>
-          <div class="auth-field"><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha" minlength="4" required></div>
-          <label class="auth-remember"><input id="loginRemember" type="checkbox" checked> <span>Manter acesso neste dispositivo</span></label>
+          <div class="auth-field"><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha" minlength="6" required></div>
           <p class="auth-error" id="loginError" role="alert" hidden></p>
           <button class="btn primary auth-submit" type="submit">Entrar no GRANA</button>
         </form>
@@ -37,11 +42,11 @@
           <div class="auth-field"><label for="registerBirth">Data de nascimento</label><input id="registerBirth" type="date" autocomplete="bday" required></div>
           <div class="auth-field"><label for="registerCpf">CPF</label><input id="registerCpf" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required></div>
           <div class="auth-field"><label for="registerEmail">E-mail</label><input id="registerEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></div>
-          <div class="auth-field"><label for="registerPassword">Senha</label><input id="registerPassword" type="password" autocomplete="new-password" placeholder="Mínimo de 4 caracteres" minlength="4" required></div>
+          <div class="auth-field"><label for="registerPassword">Senha</label><input id="registerPassword" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres" minlength="6" required></div>
           <p class="auth-error" id="registerError" role="alert" hidden></p>
           <button class="btn primary auth-submit" type="submit">Criar minha conta</button>
         </form>
-        <p class="auth-footnote">O acesso é restrito a contas cadastradas e ao administrador. Seus dados ficam somente neste navegador; nada é enviado para um servidor.</p>
+        <p class="auth-footnote">Confirme seu e-mail para acessar sua conta. Nesta etapa, as finanças são salvas neste navegador, separadas por usuário.</p>
       </div>
     </div>
   </section>
@@ -123,7 +128,7 @@
             </form>
             <form id="changePasswordForm" hidden>
               <label for="currentPassword">Senha atual</label><input id="currentPassword" type="password" autocomplete="current-password" required>
-              <label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="4" required>
+              <label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="6" required>
               <p class="profile-error" id="changePasswordError" role="alert" hidden></p>
               <div class="profile-form-actions"><button class="btn primary" type="submit">Salvar senha</button><button class="btn" type="button" id="cancelPasswordBtn">Cancelar</button></div>
             </form>
@@ -712,6 +717,8 @@
   <!-- ===============================================================
        LÓGICA DO SISTEMA (cálculos, telas e gráficos)
        =============================================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/app.js"></script>
 
 

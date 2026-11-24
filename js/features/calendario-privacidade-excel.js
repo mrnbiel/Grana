@@ -1,3 +1,4 @@
+import { userStorage } from '../core/armazenamento.js';
 import { appState } from '../core/estado.js';
 import { dim, fixedActive } from '../core/calculos.js';
 import { closeModal } from '../core/acoes.js';
@@ -123,7 +124,7 @@ function initCalendarioPrivacidadeExcel() {
   });
   // Privacy mode uses the familiar bank eye icon and persists only as a UI preference.
   const privacyKey = 'grana_privacy_mode';
-  let hidden = localStorage.getItem(privacyKey) === '1';
+  let hidden = userStorage.getItem(privacyKey) === '1';
   function protectTooltips() {
     document.querySelectorAll('.cal-event').forEach(el => {
       if (hidden && el.hasAttribute('title')) { el.dataset.privateTitle = el.title; el.removeAttribute('title'); }
@@ -136,7 +137,7 @@ function initCalendarioPrivacidadeExcel() {
     $('privacyIcon').innerHTML = hidden ? '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c5 0 8.5 4.2 9.5 7-.4 1.1-1.2 2.2-2.2 3.2M6.2 6.2C3.9 7.6 2.8 9.6 2.5 12c.8 2.4 4.3 7 9.5 7 1.2 0 2.3-.2 3.3-.7"/></svg>' : '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
     $('privacyToggle').title = hidden ? 'Mostrar valores' : 'Ocultar valores';
     $('privacyToggle').setAttribute('aria-label', $('privacyToggle').title);
-    localStorage.setItem(privacyKey, hidden ? '1' : '0');
+    userStorage.setItem(privacyKey, hidden ? '1' : '0');
   }
   $('privacyToggle').onclick = () => {
     hidden = !hidden;
@@ -193,7 +194,7 @@ function initCalendarioPrivacidadeExcel() {
     // The module state is enclosed in its original closure; resolve it through the exposed storage record.
     let state = {};
     try {
-      state = JSON.parse(localStorage.getItem('grana_prioridades_v1') || '{}');
+      state = JSON.parse(userStorage.getItem('grana_prioridades_v1') || '{}');
     } catch (_) {}
     const budget = (state.budgets || []).find(x => Number(x.id) === id);
     if (!budget) return;
@@ -202,7 +203,7 @@ function initCalendarioPrivacidadeExcel() {
       modal.querySelector('[data-cancel]').onclick = () => modal.remove();
       modal.querySelector('[data-confirm]').onclick = () => {
         state.budgets = state.budgets.filter(x => Number(x.id) !== id);
-        localStorage.setItem('grana_prioridades_v1', JSON.stringify(state));
+        userStorage.setItem('grana_prioridades_v1', JSON.stringify(state));
         modal.remove();
         location.reload();
       };
@@ -217,7 +218,7 @@ function initCalendarioPrivacidadeExcel() {
         }
         budget.limit = value;
         state.budgets = state.budgets.map(x => Number(x.id) === id ? budget : x);
-        localStorage.setItem('grana_prioridades_v1', JSON.stringify(state));
+        userStorage.setItem('grana_prioridades_v1', JSON.stringify(state));
         modal.remove();
         location.reload();
       };

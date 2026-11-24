@@ -1,64 +1,165 @@
 import { askConfirm } from './dialogos.js';
 
-/* =====================================================================
-   8b. LOGIN, CONTAS E PERFIL LOCAL
-   Nenhuma informação é enviada para servidor. Senhas criadas são SHA-256.
-   ===================================================================== */
-function initAuth() {
-  'use strict';
-  const SESSION_KEY = 'grana_session_v1', ACCOUNTS_KEY = 'grana_accounts_v1', ADMIN_HASH_KEY = 'grana_admin_password_hash';
-  const ADMIN_EMAIL = 'admin@admin', ADMIN_PASSWORD = 'admin123';
-  const gate = document.getElementById('authGate'), loginForm = document.getElementById('loginForm'), registerForm = document.getElementById('registerForm');
-  if (!gate || !loginForm || !registerForm) return;
-  const $ = id => document.getElementById(id), email = $('loginEmail'), password = $('loginPassword'), remember = $('loginRemember'), loginError = $('loginError'), registerError = $('registerError');
-  const profileBtn = $('profileBtn'), profileMenu = $('profileMenu'), profileName = $('profileName'), profileEmail = $('profileEmail'), profileEditBtn = $('profileEditBtn'), profileEditForm = $('profileEditForm'), profileEditError = $('profileEditError'), profilePasswordBtn = $('profilePasswordBtn'), profileLogoutBtn = $('profileLogoutBtn'), changePasswordForm = $('changePasswordForm'), changePasswordError = $('changePasswordError');
-  const loginMode = $('loginModeBtn'), registerMode = $('registerModeBtn');
-  const normalizeEmail = value => String(value || '').trim().toLowerCase(), digits = value => String(value || '').replace(/\D/g, '');
-  const read = (key, fallback) => { try { const value = JSON.parse(localStorage.getItem(key) || 'null'); return value ?? fallback; } catch (_) { return fallback; } };
-  const accounts = () => { const list = read(ACCOUNTS_KEY, []); return Array.isArray(list) ? list : []; };
-  const saveAccounts = list => { try { localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list)); } catch (_) {} };
-  const readSession = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || 'null'); } catch (_) { return null; } };
-  const hashPassword = async value => { if (window.crypto?.subtle) { const hash = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)); return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''); } let h = 2166136261; for (let i = 0; i < value.length; i++) h = Math.imul(h ^ value.charCodeAt(i), 16777619); return 'fallback-' + (h >>> 0).toString(16); };
-  const validCpf = value => { const cpf = digits(value); if (cpf === '33333333333') return true; /* CPF reservado exclusivamente para testes locais. */ if (cpf.length !== 11 || /^([0-9])\1{10}$/.test(cpf)) return false; let sum = 0; for (let i = 0; i < 9; i++) sum += Number(cpf[i]) * (10 - i); let check = (sum * 10) % 11; if (check === 10) check = 0; if (check !== Number(cpf[9])) return false; sum = 0; for (let i = 0; i < 10; i++) sum += Number(cpf[i]) * (11 - i); check = (sum * 10) % 11; if (check === 10) check = 0; return check === Number(cpf[10]); };
-  const validBirth = value => { if (!value) return false; const date = new Date(value + 'T00:00:00'), cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear() - 16); return !Number.isNaN(date.getTime()) && date <= cutoff; };
-  const showError = (node, message) => { node.textContent = message; node.hidden = false; }, clearError = node => { node.textContent = ''; node.hidden = true; };
-  const currentAccount = () => { const session = readSession(); if (!session?.email) return null; return normalizeEmail(session.email) === ADMIN_EMAIL ? { email: ADMIN_EMAIL, name: 'Administrador', admin: true } : accounts().find(a => a.email === normalizeEmail(session.email)) || null; };
-  const accountForEmail = value => normalizeEmail(value) === ADMIN_EMAIL ? { email: ADMIN_EMAIL, name: 'Administrador', admin: true } : accounts().find(a => a.email === normalizeEmail(value));
-  const clearAdminPage = () => document.querySelectorAll('[data-admin-ui]').forEach(node => node.remove());
-  const showApp = () => { document.body.classList.remove('auth-required'); gate.hidden = true; if (profileBtn) profileBtn.hidden = false; updateProfile(); if (currentAccount()?.admin) setupAdminPage(); else { clearAdminPage(); window.granaSetAdminTop?.(false); } };
-  const showLogin = () => { document.body.classList.add('auth-required'); gate.hidden = false; window.granaSetAdminTop?.(false); if (profileBtn) { profileBtn.hidden = true; profileMenu.hidden = true; } password.value = ''; email.focus(); };
-  const setMode = mode => { const registering = mode === 'register'; loginForm.hidden = registering; registerForm.hidden = !registering; $('authTitle').textContent = registering ? 'Crie sua conta' : 'Bem-vindo'; $('authDesc').textContent = registering ? 'Preencha seus dados para começar a usar o GRANA.' : 'Entre para acessar seu painel financeiro.'; loginMode.classList.toggle('active', !registering); registerMode.classList.toggle('active', registering); loginMode.setAttribute('aria-selected', String(!registering)); registerMode.setAttribute('aria-selected', String(registering)); clearError(loginError); clearError(registerError); (registering ? $('registerName') : email).focus(); };
-  const persistSession = (account, keep) => { const record = JSON.stringify({ email: account.email, name: account.name || 'Administrador', signedAt: new Date().toISOString() }); try { (keep ? localStorage : sessionStorage).setItem(SESSION_KEY, record); if (keep) sessionStorage.removeItem(SESSION_KEY); else localStorage.removeItem(SESSION_KEY); } catch (_) {} };
-  const adminHash = async () => localStorage.getItem(ADMIN_HASH_KEY) || hashPassword(ADMIN_PASSWORD);
-  const updateProfile = () => { const account = currentAccount(); if (!account) return; profileName.textContent = account.name || 'Administrador'; profileEmail.textContent = account.email; };
-  window.granaSetAdminTop = admin => { const launch = document.querySelector('.topactions button[onclick*="lancamentos"]'), privacy = $('privacyToggle'), month = $('monthFilter'), calendar = month?.nextElementSibling; if (launch) launch.hidden = !!admin; if (privacy) privacy.hidden = !!admin; if (month) month.hidden = !!admin; if (calendar?.classList.contains('dp-trigger')) calendar.hidden = !!admin; };
-  const setupAdminPage = () => {
-    if (document.getElementById('admin')) return;
-    const nav = document.querySelector('.nav'), label = document.createElement('div'), button = document.createElement('button');
-    label.className = 'navlabel'; label.dataset.adminUi = ''; label.textContent = 'ADMINISTRAÇÃO'; button.type = 'button'; button.dataset.page = 'admin'; button.dataset.adminUi = ''; button.innerHTML = '<span class="ico">♙</span><span>Contas cadastradas</span>'; nav.append(label, button); button.onclick = () => window.showPage('admin');
-    const page = document.createElement('section'); page.className = 'page'; page.id = 'admin'; page.dataset.adminUi = ''; page.innerHTML = '<div class="card"><h3 class="sectiontitle">Contas cadastradas</h3><div class="sectiondesc">Edite dados ou redefina senhas sem expor credenciais em texto aberto.</div><div class="admin-table-wrap"><table class="table admin-table"><thead><tr><th>Nome</th><th>Nascimento</th><th>CPF</th><th>E-mail</th><th>Senha</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody id="adminAccountsBody"></tbody></table></div><div class="admin-edit-panel" id="adminEditPanel" hidden><button class="admin-back" type="button" id="adminEditBack" aria-label="Voltar para contas cadastradas">← Voltar para contas</button><h4 class="sectiontitle">Editar conta</h4><form id="adminEditForm"><input type="hidden" id="adminEditOriginalEmail"><div class="formgrid"><div class="field"><label for="adminEditName">Nome</label><input id="adminEditName" required></div><div class="field"><label for="adminEditSurname">Sobrenome</label><input id="adminEditSurname" required></div><div class="field"><label for="adminEditBirth">Nascimento</label><input id="adminEditBirth" type="date" required></div><div class="field"><label for="adminEditCpf">CPF</label><input id="adminEditCpf" inputmode="numeric" maxlength="14" required></div><div class="field full"><label for="adminEditEmail">E-mail</label><input id="adminEditEmail" type="email" required></div><div class="field full"><label for="adminEditPassword">Nova senha (opcional)</label><input id="adminEditPassword" type="password" minlength="4" placeholder="Deixe vazio para manter a senha atual"></div></div><p class="profile-error" id="adminEditError" role="alert" hidden></p><div class="formactions"><button class="btn primary" type="submit">Salvar alterações</button><button class="btn" type="button" id="adminEditCancel">Cancelar</button></div></form></div></div>'; document.querySelector('main.main').insertBefore(page, document.querySelector('.dock')); renderAdminAccounts();
-  };
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const renderAdminAccounts = () => { const body = document.getElementById('adminAccountsBody'); if (!body) return; const list = [{ name: 'Administrador', birth: '—', cpf: '—', email: ADMIN_EMAIL, createdAt: 'Conta padrão', admin: true }, ...accounts()]; body.innerHTML = list.map(a => `<tr><td>${esc(a.name)}</td><td>${esc(a.birth === '—' ? a.birth : new Date(a.birth + 'T00:00:00').toLocaleDateString('pt-BR'))}</td><td>${esc(a.cpf ? a.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '—')}</td><td>${esc(a.email)}</td><td><span class="masked-password" title="A senha não pode ser recuperada">••••••••</span></td><td>${esc(a.createdAt === 'Conta padrão' ? a.createdAt : new Date(a.createdAt).toLocaleDateString('pt-BR'))}</td><td>${a.admin ? '<span class="pill">Padrão</span>' : `<button class="btn admin-action" type="button" data-admin-edit="${esc(a.email)}">Editar</button><button class="btn admin-action danger" type="button" data-admin-delete="${esc(a.email)}">Excluir</button>`}</td></tr>`).join(''); };
-  const openAdminEdit = account => { const parts = String(account.name || '').trim().split(/\s+/), panel = $('adminEditPanel'); $('adminEditOriginalEmail').value = account.email; $('adminEditName').value = parts.shift() || ''; $('adminEditSurname').value = parts.join(' '); $('adminEditBirth').value = account.birth || ''; $('adminEditCpf').value = account.cpf || ''; $('adminEditEmail').value = account.email; $('adminEditPassword').value = ''; clearError($('adminEditError')); panel.hidden = false; panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); $('adminEditName').focus(); };
-  document.addEventListener('click', async event => { const edit = event.target.closest('[data-admin-edit]'), del = event.target.closest('[data-admin-delete]'); if (edit) { const account = accounts().find(a => a.email === edit.dataset.adminEdit); if (account) openAdminEdit(account); } if (del) { const account = accounts().find(a => a.email === del.dataset.adminDelete); if (account && await window.askConfirm?.({ title: 'Excluir conta', message: 'Esta conta perderá o acesso ao GRANA.', detail: account.email, confirmText: 'Excluir', danger: true })) { saveAccounts(accounts().filter(a => a.email !== account.email)); renderAdminAccounts(); } } });
-  document.addEventListener('submit', async event => { if (event.target.id !== 'adminEditForm') return; event.preventDefault(); const error = $('adminEditError'), original = $('adminEditOriginalEmail').value, name = $('adminEditName').value.trim(), surname = $('adminEditSurname').value.trim(), birth = $('adminEditBirth').value, cpf = digits($('adminEditCpf').value), newEmail = normalizeEmail($('adminEditEmail').value), newPassword = $('adminEditPassword').value; clearError(error); if (name.length < 2 || surname.length < 2) return showError(error, 'Informe nome e sobrenome.'); if (!validBirth(birth)) return showError(error, 'A conta precisa ter pelo menos 16 anos.'); if (!validCpf(cpf)) return showError(error, 'O CPF informado é inválido.'); if (!$('adminEditEmail').checkValidity()) return showError(error, 'Informe um e-mail válido.'); const list = accounts(), account = list.find(a => a.email === original); if (!account) return showError(error, 'Conta não encontrada.'); if (list.some(a => a.email === newEmail && a.email !== original)) return showError(error, 'Este e-mail já está cadastrado.'); if (list.some(a => a.cpf === cpf && a.email !== original)) return showError(error, 'Este CPF já está cadastrado.'); account.name = `${name} ${surname}`; account.birth = birth; account.cpf = cpf; account.email = newEmail; if (newPassword) { if (newPassword.length < 4) return showError(error, 'A nova senha precisa ter pelo menos 4 caracteres.'); account.passwordHash = await hashPassword(newPassword); } saveAccounts(list); $('adminEditPanel').hidden = true; renderAdminAccounts(); });
-  $('adminEditCancel')?.addEventListener('click', () => { $('adminEditPanel').hidden = true; });
-  document.addEventListener('click', event => { if (event.target.closest('#adminEditBack')) { $('adminEditPanel').hidden = true; } });
-  profileBtn?.addEventListener('click', () => { const open = profileMenu.hidden; profileMenu.hidden = !open; profileBtn.setAttribute('aria-expanded', String(open)); });
-  document.addEventListener('click', event => { if (profileMenu && !profileMenu.hidden && !profileMenu.contains(event.target) && !profileBtn.contains(event.target)) { profileMenu.hidden = true; profileBtn.setAttribute('aria-expanded', 'false'); } });
-  profileEditBtn?.addEventListener('click', () => { const account = currentAccount(); if (account?.admin) { askConfirm({ title: 'Perfil do administrador', message: 'A conta admin é a conta padrão do sistema. Você pode alterar a senha neste menu.', single: true }); return; } const parts = String(account?.name || '').trim().split(/\s+/); $('profileEditName').value = parts.shift() || ''; $('profileEditSurname').value = parts.join(' '); $('profileEditBirth').value = account?.birth || ''; $('profileEditCpf').value = account?.cpf || ''; profileEditForm.hidden = false; changePasswordForm.hidden = true; clearError(profileEditError); $('profileEditName').focus(); });
-  $('cancelProfileBtn')?.addEventListener('click', () => { profileEditForm.hidden = true; profileEditForm.reset(); clearError(profileEditError); });
-  profileEditForm?.addEventListener('submit', event => { event.preventDefault(); const account = currentAccount(); clearError(profileEditError); const name = $('profileEditName').value.trim(), surname = $('profileEditSurname').value.trim(), birth = $('profileEditBirth').value, cpf = digits($('profileEditCpf').value); if (!account || account.admin) return; if (name.length < 2 || surname.length < 2) return showError(profileEditError, 'Informe nome e sobrenome.'); if (!validBirth(birth)) return showError(profileEditError, 'Você precisa ter pelo menos 16 anos.'); if (!validCpf(cpf)) return showError(profileEditError, 'O CPF informado é inválido.'); const list = accounts(), found = list.find(a => a.email === account.email); if (!found) return; if (list.some(a => a.cpf === cpf && a.email !== account.email)) return showError(profileEditError, 'Este CPF já está cadastrado.'); found.name = `${name} ${surname}`; found.birth = birth; found.cpf = cpf; saveAccounts(list); persistSession(found, true); profileEditForm.hidden = true; profileEditForm.reset(); updateProfile(); askConfirm({ title: 'Perfil atualizado', message: 'Seus dados foram salvos com sucesso.', single: true }); });
-  profilePasswordBtn?.addEventListener('click', () => { changePasswordForm.hidden = !changePasswordForm.hidden; profileEditForm.hidden = true; clearError(changePasswordError); if (!changePasswordForm.hidden) $('currentPassword').focus(); });
-  $('cancelPasswordBtn')?.addEventListener('click', () => { changePasswordForm.hidden = true; changePasswordForm.reset(); clearError(changePasswordError); });
-  changePasswordForm?.addEventListener('submit', async event => { event.preventDefault(); clearError(changePasswordError); const account = currentAccount(), current = $('currentPassword').value, next = $('newPassword').value; if (next.length < 4) return showError(changePasswordError, 'A nova senha precisa ter pelo menos 4 caracteres.'); const validCurrent = account?.admin ? (await hashPassword(current) === await adminHash()) : account && account.passwordHash === await hashPassword(current); if (!validCurrent) return showError(changePasswordError, 'A senha atual está incorreta.'); const nextHash = await hashPassword(next); if (account.admin) localStorage.setItem(ADMIN_HASH_KEY, nextHash); else { const list = accounts(), found = list.find(a => a.email === account.email); if (found) found.passwordHash = nextHash; saveAccounts(list); } changePasswordForm.reset(); changePasswordForm.hidden = true; profileMenu.hidden = true; askConfirm({ title: 'Senha alterada', message: 'Sua senha foi alterada com sucesso.', single: true }); });
-  profileLogoutBtn?.addEventListener('click', () => { try { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); } catch (_) {} setMode('login'); showLogin(); });
-  loginMode.onclick = () => setMode('login'); registerMode.onclick = () => setMode('register');
-  loginForm.addEventListener('submit', async event => { event.preventDefault(); clearError(loginError); const value = normalizeEmail(email.value); if (!email.checkValidity()) return showError(loginError, 'Informe um e-mail válido.'); if (password.value.length < 4) return showError(loginError, 'A senha precisa ter pelo menos 4 caracteres.'); const account = accountForEmail(value); const allowed = account?.admin ? password.value === ADMIN_PASSWORD && !localStorage.getItem(ADMIN_HASH_KEY) || account.admin && await hashPassword(password.value) === await adminHash() : account && account.passwordHash === await hashPassword(password.value); if (!allowed) return showError(loginError, 'E-mail ou senha inválidos. Cadastre a conta antes de entrar.'); persistSession(account, remember.checked); showApp(); });
-  registerForm.addEventListener('submit', async event => { event.preventDefault(); clearError(registerError); const name = $('registerName').value.trim(), surname = $('registerSurname').value.trim(), fullName = `${name} ${surname}`.trim(), birth = $('registerBirth').value, cpf = digits($('registerCpf').value), registerEmail = $('registerEmail'), value = normalizeEmail(registerEmail.value), secret = $('registerPassword').value; if (name.length < 2 || surname.length < 2) return showError(registerError, 'Informe nome e sobrenome.'); if (!validBirth(birth)) return showError(registerError, 'Você precisa ter pelo menos 16 anos.'); if (!validCpf(cpf)) return showError(registerError, 'O CPF informado é inválido.'); if (!registerEmail.checkValidity()) return showError(registerError, 'Informe um e-mail válido.'); if (secret.length < 4) return showError(registerError, 'A senha precisa ter pelo menos 4 caracteres.'); if (value === ADMIN_EMAIL || accounts().some(account => account.email === value)) return showError(registerError, 'Este e-mail já está cadastrado.'); if (accounts().some(account => account.cpf === cpf)) return showError(registerError, 'Este CPF já está cadastrado.'); const list = accounts(); list.push({ name: fullName, birth, cpf, email: value, passwordHash: await hashPassword(secret), createdAt: new Date().toISOString() }); saveAccounts(list); persistSession({ email: value, name: fullName }, true); showApp(); });
-  $('registerCpf').addEventListener('input', event => { const value = digits(event.target.value).slice(0, 11); event.target.value = value.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2'); });
-  const session = readSession(); if (session?.email && accountForEmail(session.email)) { email.value = session.email; showApp(); } else { try { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); } catch (_) {} showLogin(); }
+function validCpf(value) {
+  if (!/^\d{11}$/.test(value) || /^(\d)\1{10}$/.test(value)) return false;
+  for (let length = 9; length <= 10; length++) {
+    let sum = 0;
+    for (let i = 0; i < length; i++) sum += Number(value[i]) * (length + 1 - i);
+    const digit = (sum * 10 % 11) % 10;
+    if (digit !== Number(value[length])) return false;
+  }
+  return true;
 }
-
-export { initAuth };
+function profileValues(prefix) {
+  const value = id => document.getElementById(prefix + id).value.trim();
+  const profile = { nome: value('Name'), sobrenome: value('Surname'), nascimento: value('Birth'), cpf: value('Cpf').replace(/\D/g, '') };
+  const date = new Date(profile.nascimento + 'T00:00:00');
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 16);
+  if (profile.nome.length < 2 || profile.nome.length > 80 || profile.sobrenome.length < 2 || profile.sobrenome.length > 100) throw Error('Informe nome e sobrenome válidos.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(profile.nascimento) || Number.isNaN(date.getTime()) || date.getFullYear() !== Number(profile.nascimento.slice(0,4)) || date.getMonth()+1 !== Number(profile.nascimento.slice(5,7)) || date.getDate() !== Number(profile.nascimento.slice(8,10)) || date > cutoff) throw Error('Informe uma data válida. Você precisa ter pelo menos 16 anos.');
+  if (!validCpf(profile.cpf)) throw Error('O CPF informado é inválido.');
+  return profile;
+}
+async function initAuth(onReady) {
+  const $ = id => document.getElementById(id);
+  const db = window.granaDB;
+  let user = null, profile = null, epoch = 0, activeId = null;
+  let completion = false;
+  for (const id of ['registerBirth', 'registerCpf']) {
+    $(id).closest('.auth-field').hidden = true;
+    $(id).required = false;
+  }
+  let recovering = new URLSearchParams(location.hash.slice(1)).get('type') === 'recovery';
+  const recoveryForm = document.createElement('form');
+  recoveryForm.hidden = true;
+  recoveryForm.innerHTML = '<div class="auth-field"><label for="recoveryPassword">Nova senha</label><input id="recoveryPassword" type="password" autocomplete="new-password" minlength="6" required></div><p id="recoveryError" class="auth-error" role="alert" hidden></p><button class="btn primary" type="submit">Salvar nova senha</button>';
+  $('registerForm').after(recoveryForm);
+  const resetButton = document.createElement('button');
+  resetButton.type = 'button'; resetButton.className = 'btn'; resetButton.textContent = 'Esqueci minha senha';
+  $('loginForm').append(resetButton);
+  const recoveryGate = () => {
+    gate(); $('loginForm').hidden = true; $('registerForm').hidden = true; recoveryForm.hidden = false;
+    $('authTitle').textContent = 'Redefina sua senha';
+  };
+  const message = (id, text) => { $(id).textContent = text; $(id).hidden = !text; };
+  const errorText = error => error.code === '23505' ? 'Não foi possível salvar este CPF. Confira os dados ou entre em contato com o suporte.' : error.message || 'Não foi possível concluir. Tente novamente.';
+  const run = (form, errorId, action) => form.addEventListener('submit', async event => {
+    event.preventDefault(); message(errorId, '');
+    const button = form.querySelector('[type=submit]'); button.disabled = true;
+    try { await action(); } catch (error) { message(errorId, errorText(error)); }
+    finally { button.disabled = false; }
+  });
+  const mode = register => {
+    if (completion || recovering) return;
+    $('loginForm').hidden = register; $('registerForm').hidden = !register;
+    $('authTitle').textContent = register ? 'Crie sua conta' : 'Bem-vindo';
+    $('loginModeBtn').classList.toggle('active', !register); $('registerModeBtn').classList.toggle('active', register);
+    $('loginModeBtn').setAttribute('aria-selected', String(!register)); $('registerModeBtn').setAttribute('aria-selected', String(register));
+  };
+  const gate = () => { document.body.classList.add('auth-required'); $('authGate').hidden = false; $('profileMenu').hidden = true; $('profileBtn').hidden = true; };
+  const fill = prefix => { for (const [field, column] of Object.entries({Name:'nome',Surname:'sobrenome',Birth:'nascimento',Cpf:'cpf'})) $(prefix+field).value = profile?.[column] || ''; };
+  const saveProfile = async values => {
+    const id = user?.id, ticket = epoch;
+    if (!id) throw Error('Entre novamente para salvar seu perfil.');
+    const { data, error } = await db.from('perfis').update({...values, atualizado_em:new Date().toISOString()}).eq('id', id).select('id,nome,sobrenome,nascimento,cpf').single();
+    if (error) throw error;
+    if (ticket !== epoch) throw Error('Sua sessão mudou. Entre novamente.');
+    profile = data;
+  };
+  const show = async session => {
+    const ticket = ++epoch;
+    if (activeId && session?.user?.id !== activeId) { location.reload(); return; }
+    user = session?.user || null; gate();
+    if (!user) return;
+    if (recovering) { recoveryGate(); return; }
+    const {data, error} = await db.from('perfis').select('id,nome,sobrenome,nascimento,cpf').eq('id', user.id).maybeSingle();
+    if (ticket !== epoch) return;
+    if (error) throw error;
+    if (!data) throw Error('Perfil ausente. Solicite a execução do backfill de perfis no banco.');
+    profile = data;
+    completion = !data.nome || !data.sobrenome || !data.nascimento || !data.cpf;
+    if (completion) {
+      mode(false); $('loginForm').hidden = true; $('registerForm').hidden = false;
+      $('authTitle').textContent = 'Complete seu perfil';
+      $('authDesc').textContent = 'Salve seus dados para continuar.';
+      fill('register');
+      for (const id of ['registerBirth', 'registerCpf']) {
+        $(id).closest('.auth-field').hidden = false;
+        $(id).required = true;
+      }
+      for (const id of ['registerEmail','registerPassword']) { $(id).closest('.auth-field').hidden = true; $(id).required = false; $(id).value = ''; }
+      return;
+    }
+    if (!activeId) { activeId = user.id; window.granaUserId = user.id; onReady(); }
+    $('profileName').textContent = data.nome + ' ' + data.sobrenome; $('profileEmail').textContent = user.email;
+    $('authGate').hidden = true; $('profileBtn').hidden = false; document.body.classList.remove('auth-required');
+  };
+  if (!db) { document.body.classList.remove('auth-loading'); message('loginError','Não foi possível carregar o Supabase. Confira a conexão.'); return; }
+  resetButton.onclick = async () => {
+    resetButton.disabled = true;
+    try {
+      if (!$('loginEmail').checkValidity()) throw Error('Informe seu e-mail no campo acima.');
+      const {error} = await db.auth.resetPasswordForEmail($('loginEmail').value.trim(), {redirectTo:location.origin+location.pathname});
+      if (error) throw error;
+      message('loginError','Se houver uma conta para esse e-mail, você receberá as instruções.');
+    } catch(error) { message('loginError',errorText(error)); }
+    finally { resetButton.disabled = false; }
+  };
+  run(recoveryForm,'recoveryError',async () => {
+    if ($('recoveryPassword').value.length < 6) throw Error('Use pelo menos 6 caracteres.');
+    const {error} = await db.auth.updateUser({password:$('recoveryPassword').value});
+    if(error) throw error;
+    recoveryForm.reset(); recovering = false; recoveryForm.hidden = true;
+    history.replaceState(null,'',location.pathname+location.search);
+    await show({user});
+  });
+  $('loginModeBtn').onclick = () => mode(false); $('registerModeBtn').onclick = () => mode(true);
+  run($('loginForm'), 'loginError', async () => {
+    const {data,error} = await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
+    $('loginPassword').value = ''; if(error) throw error; await show(data.session);
+  });
+  run($('registerForm'), 'registerError', async () => {
+    if (completion) {
+      await saveProfile(profileValues('register'));
+      await show({user});
+      return;
+    }
+    const values = {nome:$('registerName').value.trim(), sobrenome:$('registerSurname').value.trim()};
+    if (values.nome.length < 2 || values.nome.length > 80 || values.sobrenome.length < 2 || values.sobrenome.length > 100) throw Error('Informe nome e sobrenome válidos.');
+    if (!$('registerEmail').checkValidity()) throw Error('Informe um e-mail válido.');
+    if ($('registerPassword').value.length < 6) throw Error('Use pelo menos 6 caracteres na senha.');
+    const {data,error} = await db.auth.signUp({email:$('registerEmail').value.trim(), password:$('registerPassword').value, options:{emailRedirectTo:location.origin+location.pathname, data:{nome:values.nome,sobrenome:values.sobrenome}}});
+    $('registerPassword').value = ''; if(error) throw error;
+    if(data.session) { await show(data.session); }
+    else { $('registerForm').reset(); mode(false); message('loginError','Confira seu e-mail para confirmar o cadastro. Após entrar, complete CPF e nascimento.'); }
+  });
+  $('profileBtn').onclick = () => { $('profileMenu').hidden = !$('profileMenu').hidden; $('profileBtn').setAttribute('aria-expanded',String(!$('profileMenu').hidden)); };
+  $('profileEditBtn').onclick = () => { fill('profileEdit'); $('profileEditForm').hidden = false; $('changePasswordForm').hidden = true; };
+  $('cancelProfileBtn').onclick = () => { $('profileEditForm').hidden = true; $('profileEditForm').reset(); };
+  run($('profileEditForm'),'profileEditError',async () => { await saveProfile(profileValues('profileEdit')); $('profileEditForm').hidden=true; await show({user}); });
+  $('profilePasswordBtn').onclick = () => { $('changePasswordForm').hidden=false; $('profileEditForm').hidden=true; };
+  $('cancelPasswordBtn').onclick = () => { $('changePasswordForm').hidden=true; $('changePasswordForm').reset(); };
+  run($('changePasswordForm'),'changePasswordError',async () => {
+    const {error:loginError}=await db.auth.signInWithPassword({email:user.email,password:$('currentPassword').value});
+    if(loginError) throw loginError;
+    const {error}=await db.auth.updateUser({password:$('newPassword').value}); if(error) throw error;
+    $('changePasswordForm').reset(); $('changePasswordForm').hidden=true;
+    askConfirm({title:'Senha alterada',message:'Sua senha foi atualizada.',single:true});
+  });
+  $('profileLogoutBtn').onclick = async () => {
+    gate(); ++epoch;
+    const {error}=await db.auth.signOut();
+    if(error) { message('loginError',errorText(error)); return; }
+    location.reload();
+  };
+  db.auth.onAuthStateChange((event,session) => {
+    if(event==='SIGNED_OUT' || (activeId && session?.user?.id!==activeId)) { gate(); location.reload(); }
+    if(event==='PASSWORD_RECOVERY') { recovering=true; user=session.user; setTimeout(recoveryGate,0); }
+    if(event==='TOKEN_REFRESHED') user=session.user;
+  });
+  try { const {data,error}=await db.auth.getSession(); if(error) throw error; await show(data.session); }
+  catch(error) { message('loginError',errorText(error)); }
+  finally { document.body.classList.remove('auth-loading'); }
+}
+export { initAuth, validCpf, profileValues };
