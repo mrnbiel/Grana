@@ -36,10 +36,14 @@ async function initAuth(onReady) {
   recoveryForm.innerHTML = '<div class="auth-field"><label for="recoveryPassword">Nova senha</label><input id="recoveryPassword" type="password" autocomplete="new-password" minlength="6" required></div><p id="recoveryError" class="auth-error" role="alert" hidden></p><button class="btn primary" type="submit">Salvar nova senha</button>';
   $('registerForm').after(recoveryForm);
   const resetButton = document.createElement('button');
-  resetButton.type = 'button'; resetButton.className = 'btn'; resetButton.textContent = 'Esqueci minha senha';
+  resetButton.type = 'button'; resetButton.className = 'btn auth-forgot'; resetButton.textContent = 'Esqueci minha senha';
   $('loginForm').append(resetButton);
+  const requestForm = document.createElement('form');
+  requestForm.hidden = true;
+  requestForm.innerHTML = '<div class="auth-field"><label for="resetEmail">E-mail da sua conta</label><input id="resetEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></div><p id="resetError" class="auth-error" role="alert" hidden></p><p id="resetStatus" class="auth-status" role="status" hidden></p><button class="btn primary auth-submit" type="submit">Enviar link de recuperação</button><button class="btn auth-back" type="button" id="resetBack">Voltar para entrar</button>';
+  $('registerForm').after(requestForm);
   const recoveryGate = () => {
-    gate(); $('loginForm').hidden = true; $('registerForm').hidden = true; recoveryForm.hidden = false;
+    gate(); requestForm.hidden = true; document.querySelector('.auth-switch').hidden = true; $('loginForm').hidden = true; $('registerForm').hidden = true; recoveryForm.hidden = false;
     $('authTitle').textContent = 'Redefina sua senha';
   };
   const message = (id, text) => { $(id).textContent = text; $(id).hidden = !text; };
@@ -52,6 +56,8 @@ async function initAuth(onReady) {
   });
   const mode = register => {
     if (completion || recovering) return;
+    requestForm.hidden = true; recoveryForm.hidden = true; document.querySelector('.auth-switch').hidden = false;
+    $('authDesc').textContent = register ? 'Preencha seus dados para criar sua conta.' : 'Entre para acessar seu painel financeiro.';
     $('loginForm').hidden = register; $('registerForm').hidden = !register;
     $('authTitle').textContent = register ? 'Crie sua conta' : 'Bem-vindo';
     $('loginModeBtn').classList.toggle('active', !register); $('registerModeBtn').classList.toggle('active', register);
@@ -95,17 +101,25 @@ async function initAuth(onReady) {
     $('profileName').textContent = data.nome + ' ' + data.sobrenome; $('profileEmail').textContent = user.email;
     $('authGate').hidden = true; $('profileBtn').hidden = false; document.body.classList.remove('auth-required');
   };
-  if (!db) { document.body.classList.remove('auth-loading'); message('loginError','Não foi possível carregar o Supabase. Confira a conexão.'); return; }
-  resetButton.onclick = async () => {
-    resetButton.disabled = true;
-    try {
-      if (!$('loginEmail').checkValidity()) throw Error('Informe seu e-mail no campo acima.');
-      const {error} = await db.auth.resetPasswordForEmail($('loginEmail').value.trim(), {redirectTo:location.origin+location.pathname});
-      if (error) throw error;
-      message('loginError','Se houver uma conta para esse e-mail, você receberá as instruções.');
-    } catch(error) { message('loginError',errorText(error)); }
-    finally { resetButton.disabled = false; }
+  if (!db) { message('loginError','Não foi possível carregar o Supabase. Confira a conexão.'); return; }
+  resetButton.onclick = () => {
+    $('loginForm').hidden = true; $('registerForm').hidden = true;
+    document.querySelector('.auth-switch').hidden = true;
+    requestForm.hidden = false;
+    $('authTitle').textContent = 'Recupere sua senha';
+    $('authDesc').textContent = 'Informe seu e-mail para receber o link de recuperação.';
+    $('resetEmail').value = $('loginEmail').value;
+    message('resetError', ''); message('resetStatus', '');
+    $('resetEmail').focus();
   };
+  $('resetBack').onclick = () => { mode(false); $('loginEmail').focus(); };
+  run(requestForm, 'resetError', async () => {
+    message('resetStatus', '');
+    if (!$('resetEmail').checkValidity()) throw Error('Informe um e-mail válido.');
+    const {error} = await db.auth.resetPasswordForEmail($('resetEmail').value.trim(), {redirectTo:location.origin+location.pathname});
+    if (error) throw error;
+    message('resetStatus','Se houver uma conta para esse e-mail, você receberá as instruções.');
+  });
   run(recoveryForm,'recoveryError',async () => {
     if ($('recoveryPassword').value.length < 6) throw Error('Use pelo menos 6 caracteres.');
     const {error} = await db.auth.updateUser({password:$('recoveryPassword').value});
@@ -160,6 +174,5 @@ async function initAuth(onReady) {
   });
   try { const {data,error}=await db.auth.getSession(); if(error) throw error; await show(data.session); }
   catch(error) { message('loginError',errorText(error)); }
-  finally { document.body.classList.remove('auth-loading'); }
 }
 export { initAuth, validCpf, profileValues };

@@ -345,3 +345,11 @@ body.auth-required .app { visibility: hidden; }
 .privacy-mode .gp-month-heading>strong, .privacy-mode .gp-budget-card,
 .privacy-mode .gp-alert, .privacy-mode .cal-event,
 .privacy-mode #homeFixedDue, .privacy-mode #homeGoals { filter: blur(7px); user-select:none; }
+
+/* Acesso e recuperação de senha */
+.auth-forgot { display: block; margin: 16px auto 0; padding: 7px 12px; font-size: 12px; line-height: 1.4; }
+.auth-back { display: block; margin: 14px auto 0; padding: 8px 12px; font-size: 13px; }
+.auth-status { margin: 14px 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.auth-submit { margin-top: 16px; }
+.auth-error { margin-top: 12px; }
+.auth-switch[hidden] { display: none; }
