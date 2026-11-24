@@ -353,3 +353,29 @@ body.auth-required .app { visibility: hidden; }
 .auth-submit { margin-top: 16px; }
 .auth-error { margin-top: 12px; }
 .auth-switch[hidden] { display: none; }
+
+/* Rolagem do menu na borda externa esquerda. */
+.sidebar {
+  direction: rtl;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #45434b #0b0813;
+}
+.sidebar > * {
+  direction: ltr;
+}
+.sidebar::-webkit-scrollbar {
+  width: 7px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: #0b0813;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: #45434b;
+  border: 2px solid #0b0813;
+  border-radius: 999px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #63616b;
+}
+
